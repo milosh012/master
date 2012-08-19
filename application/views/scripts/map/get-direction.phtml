@@ -1,0 +1,59 @@
+
+<?php  
+   echo $this->partial("partials/header.phtml", array('msg' => "get direction from...",'username' => $this->username,)); 
+?> 
+<?php  echo $this->partial("partials/nav.phtml");  ?>
+
+<div class="contentHolder" >
+<form id="form">
+        <div class="textFieldHolder">
+            <span>From <em>(street, city, post code, country)</em></span><br>
+            <input style="width: 910px;" type="text" id="start" /> 
+        </div>
+        <div class="textFieldHolder">
+            <span>to <em>(street, city, post code, country)</em></span><br>
+            <input style="width: 910px;" type="text" id="end" value="<?php echo $this->end; ?>" /> 
+            <p class="directionInfo" ><?php echo $this->html; ?></p>
+            <div style="clear: both;" ></div>
+        </div>
+        <button style="margin-left:185px; margin-top: 15px; width: 300px;" id="goBack" >Go back</button>
+        <button style=" margin-top: 15px; width: 300px;" id="getdirections" >Get Directions!</button>
+    </form>
+    
+    <div id="directions"></div>
+    <div  style="width:950px; height:500px; margin-bottom: 20px; margin-left:15px; border:1px solid black;" id="map"></div>
+    
+</div>
+
+<?php  echo $this->partial("partials/nav.phtml");  ?>
+
+<script type="text/javascript" src="/js/gps.jquery.js" ></script>
+<script type="text/javascript">
+$(function() {
+	
+	$("#getdirections").button({
+		icons: {
+	        primary: 'ui-icon-check'
+	    },
+	    text: true
+		}).click(function(){
+		 $("#directions").html("");
+    });
+
+	$("#goBack").button({
+		 icons: {
+	        primary: 'ui-icon-cancel'
+	    },
+	    text: true
+		}).click(function(){
+			  history.back();
+			  return false;
+        });
+    
+    $("#map").googleMap({
+    	zoomLevel: 14,
+    	center: '<?php echo $this->end; ?>',
+    	tooltip: '<?php echo $this->html; ?>'
+    }).load();
+});
+</script>

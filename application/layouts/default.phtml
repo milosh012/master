@@ -1,0 +1,25 @@
+<?php echo $this->doctype('XHTML1_STRICT'); ?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="google-site-verification" content="j9mUD667zV035AbnwsMLYl5bilR9RTxgAn6sihlrWWo" />
+        <?php echo $this->headLink()->appendStylesheet('/css/style.css') ?>
+        <?php echo $this->headScript()->appendFile('/js/jquery-1.4.2.min.js','text/javascript'); ?>
+        <link rel='stylesheet' type='text/css' href='/css/smoothness/jquery-ui-1.8.4.custom.css' />
+        
+        <script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2&sensor=true&amp;key=<?php echo Zend_Registry::get("apiKey"); ?>"></script>
+        <script type="text/javascript" src="/js/formatDate.js" ></script>
+        <script type="text/javascript" src="/js/jquery-ui-1.8.4.custom.min.js" ></script>
+        <script type="text/javascript" src="/js/jquery-ui-timepicker-addon-0.6.min.js" ></script>    
+        
+        <title>Janjic Milos - Master</title>
+    </head>
+    <body>
+        
+        <?php echo $this->layout()->content; ?>
+        
+        <div id="footer" class="contentHolder">
+            <p>&copy; Copyright <a href="/">Janjic Milos</a></p>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,384 @@
+<link rel='stylesheet' type='text/css' href='/css/fullcalendar.css' />
+<script type="text/javascript" src="/js/fullcalendar.js" ></script>
+
+<script type='text/javascript'>
+
+	function urlEncode(s){
+	    return encodeURIComponent( s ).replace( /\%20/g, '+' ).replace( /!/g, '%21' ).replace( /'/g, '%27' ).replace( /\(/g, '%28' ).replace( /\)/g, '%29' ).replace( /\*/g, '%2A' ).replace( /\~/g, '%7E' );
+	}
+
+    $(document).ready(function() {
+        var ajaxloader = "<img src=\"/images/ajax-loader.gif\" alt=\"loader\">";
+        var currentStartDate = '';
+        var currentEndDate = '';
+
+        $("#quickAddInfo").dialog({
+        	autoOpen: false,
+            modal: true,
+            show: 'blind',
+            hide: 'explode',
+            height: 550,
+            width: 800,
+            buttons: {
+                Ok: function() {
+                    $(this).dialog('close');
+                }
+            }
+        });
+
+        $("#quickAddMore").button({
+            icons: {
+                primary: 'ui-icon-info'
+            },
+            text: false
+        });
+        
+    	// Dialog           
+        $('#quickAddDialog').dialog({
+        	autoOpen: false,
+            height: 280,
+            width: 483,
+            modal: true,
+            resizable: false,
+            open: function(event, ui) {
+          	     $("#what").focus();
+            },
+            close: function(event, ui) {
+            	$("#what").val("");
+            	$("#whatError").html("");
+                },
+            buttons: {
+	           	"Edit event details": function() { 
+	                $("#what").val("");
+	                $(this).dialog("close"); 
+	                var start = $("#startDate1").val();
+	                var end = $("#endDate1").val();
+	                
+	                window.location.replace('/home/create-event/?startDate=' + start + '&endDate=' + end );
+	                return false;
+	            },
+                "Create event": function() { 
+                  if ($("#what").val() != ""){
+                	    var tekst = $("#what").val() + ' ' + $('p#when b').html();
+                	    
+		                calendar.fullCalendar('unselect');
+		                
+	                    $(this).dialog("close"); 
+	                    $("#loading").html(ajaxloader); 
+	                    
+	                    $.get('/home/create-quick-add-event', {what: tekst}, function(data) {
+	                    	if (data == "OK")
+	                            calendar.fullCalendar('refetchEvents');
+	                    });
+                  }else {
+              	      $("#whatError").html("You must enter title for new event!");
+                  }
+                }
+            }
+        });
+
+        $('#showEventDialog').dialog({
+            autoOpen: false,
+            height: 470,
+            width: 483,
+            show: 'blind',
+            hide: 'explode',
+            modal: true,
+            resizable: false,
+            open: function(event, ui) {
+	                  $("#previewLoading").css("display","block");
+                  },
+            close: function(event, ui) {
+                $("#showWhen").html("");
+                $("#showWhere").html("");
+                $("#showTitle").html("");
+                $("#eventId").val("");
+            },
+            buttons: {
+                "Edit event details": function() { 
+                    $(this).dialog("close"); 
+                    window.location.replace('/home/edit-event-details/?eventId=' + $("#eventId").val());
+                },
+                "Delete" : function() { 
+                	var $dialog = $(this);
+                	$("#previewLoading").css("display","block");
+                    $.get('/home/delete-event', {eventId: $("#eventId").val() }, function(data) {
+                 	        $dialog.dialog("close"); 
+                            if (data == "OK"){
+                               calendar.fullCalendar('refetchEvents' );
+                            }
+                    }, 'json');
+                    
+                }
+            }
+        });
+
+
+        var calendar = $('#calendar').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            selectable: true,
+            firstDay: 1,
+            weekMode: 'liquid',
+            lazyFetching: false,
+            timeFormat: {
+                agenda: 'H:mm{ - H:mm}',
+                '': 'H(:mm), '
+            },
+            columnFormat: {
+                week: 'ddd, d MMM',
+                day: 'dddd, d MMM'
+            },
+            selectHelper: true,
+            select: function(start, end, allDay) {
+
+            	var view = calendar.fullCalendar('getView');
+                if (view.name == "month"){
+	                var startdate = $.datepicker.formatDate('MM d yy', start);
+	                var enddate = $.datepicker.formatDate('MM d yy', end);
+	                
+	                $("#startDate1").val($.datepicker.formatDate('yy-mm-dd', start));
+	                $("#endDate1").val($.datepicker.formatDate('yy-mm-dd', end));
+
+	                if (startdate == enddate)
+	                    $('p#when').html("When: <b>" + startdate + "</b>");
+	                else $('p#when').html("When: <b>" + startdate + " - " + enddate +"</b>");
+	                
+                }else if (view.name == "agendaWeek" || view.name == "agendaDay"){
+                	var startdate = start.format('D, M j, H:i');
+                	var enddate = end.format('H:i');
+                	
+                    $("#startDate1").val(start.format('Y-m-d H:i'));
+                    $("#endDate1").val(end.format('Y-m-d H:i'));
+
+                    $('p#when').html("When: <b>" + startdate + " - " + enddate +"</b>");
+                }
+                
+            	$('#quickAddDialog').dialog('open');
+            },
+            editable: true,
+            
+            events: "/home/rerender-events?start="+currentStartDate+"&end="+currentEndDate,
+            
+            viewDisplay: function(view) {
+            	currentStartDate = view.start;
+            	currentEndDate = view.end;
+            },
+            
+            loading: function( isLoading, view ) {
+                if (!isLoading)  $("#loading").html("");
+                else $("#loading").html(ajaxloader); 
+            },
+
+            eventClick: function( calEvent, jsEvent, view ) { 
+            	$('#showEventDialog').dialog('open');
+            	$.get('/home/get-event', {eventId: calEvent.id}, function(data) {
+            	    $("#showTitle").html(data.title);
+            	    
+            	    var encodedTitle = urlEncode(data.title);
+
+            	    var when = "";
+            	    $.each(data.when, function(index, value) { 
+                        var start = new Date(value.start);
+                        var end = new Date(value.end);
+                        
+                	    if (value.end == value.start && value.allDay == true){
+                	    	when += start.format('D, M j');
+                	    }else  if (value.end != value.start && value.allDay == true){
+                	    	when += start.format('D, M j') + " - " + end.format('D, M j');
+                	    }else  if (value.end == value.start && value.allDay == false){
+                    	    when += start.format('D, M j, ') + value.startTime + " - " + value.endTime;
+                	    }else  if (value.end != value.start && value.allDay == false){
+                            when += start.format('D, M j, ') + value.startTime + " - " + end.format('D, M j, ') + value.endTime;
+                        }
+                 	    	    
+          	    	});
+          	    	            	    
+            	    $("#showWhen").html(when);
+            	    var encodedWhen = urlEncode(when);
+            	    
+            	    var where = "";
+            	    $.each(data.where, function(index, value) { 
+                	    if (value.location != null && value.location != ''){
+              	    	    where += value.location;
+              	    	    var encodedLocation = urlEncode(value.location);
+              	    	    if (encodedLocation != '')
+                	    	      where += '<br /><a id="getDirection" href="/map/get-direction?end='+encodedLocation+'&title='+encodedTitle+'&when='+encodedWhen+'" >get direction</a>';
+                	    }
+                    });
+
+            	    $("#showWhere").html(where);
+            	    $("#eventId").val(calEvent.id);
+            	    $("#previewLoading").css("display", "none");
+            	    
+                }, 'json');
+            }
+              
+        });
+
+        
+        $("#quickButton").click(function(){
+        	//sending event to google api
+        	var what = $("#quickEvent").val();
+        	
+            $.get('/home/create-quick-add-event', {what: what}, function(data) {
+            	if (data == "OK")
+            	    calendar.fullCalendar('refetchEvents' );
+            }, 'json');
+            $("#quickEvent").val("");
+            
+            $(this).removeClass('ui-state-default').addClass('ui-state-disabled').attr("disabled", "disabled");
+         });
+
+        $("#quickEvent").keyup(function(event){
+     	   if ($("#quickEvent").val() != "") {
+     		  $("#quickButton").removeClass('ui-state-disabled').addClass('ui-state-default').removeAttr("disabled");
+        	  if (event.keyCode == '13') $("#quickButton").click();
+     	   }else $("#quickButton").removeClass('ui-state-default').addClass('ui-state-disabled').attr("disabled", "disabled");
+         });
+
+        $("#quickAddMore").click(function(){$('#quickAddInfo').dialog('open');})
+    });
+
+</script>
+
+<?php  echo $this->partial("partials/header.phtml", array('msg' => "show me all my events!",'username' => $this->username,));  ?>
+<?php  echo $this->partial("partials/nav.phtml", array('current' => 'all'));  ?>
+<div class="contentHolder" >
+    <div id="loading" style="text-align: center;"><img src="/images/ajax-loader.gif" alt="loader"></div>
+    <div style=" text-align: center;">
+	    <input type="text" id="quickEvent" />
+	    <button disabled="disabled" type="button" id="quickButton" class="ui-button ui-widget ui-state-disabled ui-corner-all ui-button-text-only" 
+	            role="button" aria-disabled="false">
+	            <span class="ui-button-text">Quick add event</span>
+	    </button>
+	    <button id="quickAddMore">Info</button>
+    </div>
+    <span style="width: 526px; height: 58px; display: block; font-size: 85%; text-align: right;">
+        <i><b>e.g.</b> Dinner <b>at</b> Joe's <b>on</b> Thursday at 8 PM</i>
+    </span>
+    <div id='calendar'></div>
+</div>
+
+<!-- dialogs -->
+<div id="quickAddDialog" title="Create new event">
+	    <fieldset>
+	        <p  id="when"></p>
+	        <label for="what">What</label>
+	        <input type="text" style="width: 355px;" name="what" id="what" class="text ui-widget-content ui-corner-all" />
+	        <div id="whatError" class="error"></div>
+	        <input type="hidden" id="startDate1" value="" />
+	        <input type="hidden" id="endDate1" value="" />
+	    </fieldset>
+</div>
+
+<div id="showEventDialog" title="Preview event">
+    <div id="previewLoading" style="text-align: center;"><img src="/images/ajax-loader.gif" alt="loader"></div>
+    <div style="margin-top: 20px; padding: 0.7em; text-align: center;" class="ui-state-highlight ui-corner-all"> <h3  id="showTitle" ></h3></div>
+    <img src="/images/calendar.png" align="left" /><div style="margin-top: 20px; padding: 0.7em;" class="ui-state-highlight ui-corner-all"> <p  id="showWhen" ></p></div>
+    <div style="clear: both;" ></div>
+    <img src="/images/location.png" width="93" style=" margin-left: 21px; margin-right: 14px;" align="left" />
+    <div style="margin-top: 20px; padding: 0.7em;" class="ui-state-highlight ui-corner-all"> 
+        <p  id="showWhere" ></p>
+    </div>
+    <input type="hidden" id="eventId" value="" />
+</div>
+
+<div id="quickAddInfo" title="About the 'Quick Add' feature">
+	<p>Don't like filling out complicated forms? Quick Add can (almost) read your mind. If you type in something like [Brunch with Mom at Java 11am Sunday], Quick Add can figure out what you mean and pop the new event right onto your calendar.</p>
+	<div class="ui-widget">
+		<div style="margin: 20px 0;" class="ui-state-highlight ui-corner-all" >
+			<p>The recipe for events is to enter 'what,' 'who,' 'where,' and 'when' (only 'what' and 'when' are required).
+			</p>
+			<ul>
+				<li><strong>What:</strong> This can be any text; the event title is created from this. </li>
+				<li><strong>When:</strong> This can be nearly any date and/or time expression. Using 'at' and 'on' can help. </li>
+				<li><strong>Who:</strong> This should begin with 'with' followed by a list of email addresses; these are added to the guest list.</li>
+				<li><strong>Where:</strong> This can be any text following 'at' or 'in.'</li>
+			</ul>
+		</div>
+	</div>
+	<h3>How Quick Add works and how to use it
+	</h3>
+	<p>If you have a name of a location that includes a date or time word, such as 
+	'Taco Tuesdays' or 'Café 3pm,' use quotation marks around the name to avoid Quick 
+	Add from creating the event on Tuesday or at 3pm.</p>
+	<ul>
+	   <li> Enter [lunch with John at "Taco Tuesdays" Friday 12 pm]</li>
+	</ul>
+	<p>If you enter a time with no date, Quick Add will create the event on the earliest date 
+	that puts the event in the future; the present day if the time is later, 
+	or the next day if the time has already passed: </p>
+	<ul>
+	   <li>Enter [Volleyball at 5pm]</li>
+	</ul>
+	<p>If you do not enter a start time or end time, Quick Add will create an All Day event:</p>
+	<ul>
+	   <li>Enter [Bank holiday 8/14]</li>
+	</ul>
+	<p>If you don't enter an end time, Quick Add will create a one hour long event: </p>
+	<ul>
+	   <li>Enter [Staff meeting next Monday at 13:00]</li>
+	</ul>
+	<p>You can specify start and end times using either time ranges or time intervals: </p>
+	<ul>
+	   <li>Enter [Running w/ Pat 2:15 tomorrow for 45 minutes] </li>
+	   <li>Enter [Running w/ Pat 2:15 - 3 pm tomorrow]</li>
+	</ul>
+	<p>Multi-day events can be specified using date ranges:</p>
+	<ul>
+	   <li>Enter [National Conference 9/23 - 9/26 in Atlanta]</li>
+	</ul>
+	<p>If you'd like someone added to the guest list, enter his or her email address.
+	</p>
+	<ul>
+	   <li>Enter [Lunch at Charlie's tomorrow noon gcal@gmail.com]</li>
+	</ul> 
+	<p>Three-letter time zone abbreviations can be recognized following the time:</p>
+	<ul>
+	   <li>Enter [Call New York at 3 pm EDT]</li>
+	</ul><br /><br /><br />
+	<h3>Creating recurring events
+	</h3>
+	<p>When creating recurring events, the time expression has three parts: the start, the repetition, and the end.</p>
+	<p>Example: [Gardening Monday at 10 am repeats weekly for 8 weeks]. </p>
+	<p>The start is 'Monday at 10 am,' the repetition rule is 'repeats weekly,' 
+	and the end is given by '8 weeks.' Quick Add understands many kinds of repetition 
+	rules covering daily, weekly, monthly, and yearly repetitions. Examples are 
+	given below. We also encourage you to try various texts to explore this feature further. </p>
+	<p>To create a weekly recurring event:
+	</p>
+	<ul>
+		<li>Enter [Meeting at work every Monday at 2pm] </li>
+		<li>Enter [Tennis practice Tuesday 7pm to 9pm weekly]</li>
+	</ul> 
+	<p>To create a monthly recurring event:</p>
+	<ul>
+		<li>Enter [Dinner at Mom's on the first Tuesday of every month] </li>
+		<li>Enter [Manicure on 9/1 every month]</li>
+    </ul>
+	<p>To create a yearly recurring event:
+	</p>
+	<ul>
+	   <li>Enter [Mom's birthday June 19 yearly] </li>
+	   <li>Enter [Wedding anniversary July 3 yearly]</li>
+	</ul> 
+	<p>To create an event that repeats a certain number of times:</p>
+	<ul>
+	   <li>Enter [Baseball Game every Thursday for 10 weeks] </li>
+	   <li>Enter [Language Class every Wednesday 7-8pm for 5 months] </li>
+	</ul>
+	<p>When entering recurring events, don't enter a location in the middle of 
+	a time expression. For example, don't enter [dance practice every Tuesday 
+	in the gym at 8pm]. This event should be entered [dance practice at the gym every Tuesday 8pm].</p>
+	<p>Also, if you do not specify an end date, duration, or number of 
+	times the recurring event occurs, it will repeat for 365 times, which 
+	is the maximum number of instances currently allowed for a recurring event. </p>
+
+</div>
+
+<?php  echo $this->partial("partials/nav.phtml", array('current' => 'all'));  ?>
+

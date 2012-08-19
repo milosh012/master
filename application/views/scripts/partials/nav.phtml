@@ -1,0 +1,30 @@
+<script src="/js/jquery.color.js" type="text/javascript" ></script>
+
+<script type="text/javascript">
+ 
+ $(document).ready(function(){
+	  
+	  $("#selectAction a").hover(function() {
+		    $(this).animate({ color: "#FF3D00" }, 300);
+	  },function() {
+		    $(this).animate({ color: "#FFFFFF" }, 300);
+	  }); 
+
+ });
+
+</script>
+
+  <div class="contentHolder" >       
+        
+        <div id="selectAction">
+           <ul>
+               <li <?php if ($this->current == 'all')
+        echo ' class="current" '?> ><a href="/home/all-events">show me all my events.</a></li>
+               <li <?php if ($this->current == 'map')
+        echo ' class="current" '?>><a href="/map/show-map">show me future events on map.</a></li>
+               <li <?php if ($this->current == 'create')
+        echo ' class="current" '?>><a href="/home/create-event">create me an event.</a></li>
+           </ul>
+        </div>
+        
+    </div>

@@ -1,0 +1,166 @@
+
+<?php  
+            echo $this->partial("partials/header.phtml", array('msg' => "create an event...",'username' => $this->username,)); 
+?> 
+
+<?php 
+        echo $this->partial("partials/nav.phtml", array('current' => 'create'));  
+ ?>
+
+<div class="contentHolder" >
+        <form action="/home/create-event" name="form" method="POST" id="form"> 
+            <div class="textFieldHolder">
+                <span>title</span><br>
+                <input type="text" value="" style="width: 440px;" name="title">
+            </div>
+            <div class="textFieldHolder">
+                <span>when</span><br>
+                <input style=" width: 92px;" type="text" value="<?php echo $this->startDate; ?>" id="startDate" name="startDate">
+                <input style=" width: 50px; <?php if ($this->startTime == null) echo ' display: none; '; ?>  " maxlength="5" type="text" value="<?php if ($this->startTime == null) echo date('H:i'); else echo $this->startTime; ?>" id="startTime" name="startTime">
+                <span style=" margin-left: 5px;" > to 
+                    <input style=" width: 92px; margin-left: 5px;" type="text" value="<?php echo $this->endDate; ?>" id="endDate" name="endDate">
+                    <input style=" width: 50px; <?php if ($this->startTime == null) echo ' display: none; '; ?>" maxlength="5" type="text" value="<?php if ($this->endTime == null) echo date('H:i'); else echo $this->endTime; ?>" id="endTime" name="endTime">
+                   &nbsp;&nbsp;&nbsp;
+                   <input type="checkbox" id="allday" name="allday" <?php if ($this->startTime == null) echo ' checked="checked" '; ?> value="1" /><label for="allday">all day</label>
+                </span>
+            </div>
+            <div class="textFieldHolder">
+                <span>where</span><br>
+                <input type="text" value="" name="where">
+            </div>
+            <div class="textFieldHolder">
+                <span>description</span><br>
+                <textarea name="desc"></textarea>
+            </div>
+            
+            <div class="reminderRow textFieldHolder" >
+                <span >Reminder</span><br />
+                <div id="1Reminder" style="margin-top: 5px;">
+                    <div id="1radio" style="float: left; margin-top: 9px;">
+                        <input type="radio" id="1radio1" name="1reminderType" value="email" /><label for="1radio1">email</label>
+                        <input type="radio" id="1radio2" name="1reminderType" value="sms" checked="checked" /><label for="1radio2">sms</label>
+                        <input type="radio" id="1radio3" name="1reminderType" value="alert" /><label for="1radio3">alert</label>
+                    </div>
+                    <input type="text"  value="3" name="1remCount" style="float: left;">
+                    <div id="1radioUnit" style="float: left; margin-left: 5px;  margin-top: 9px;">
+                        <input type="radio" id="1radioUnit1" name="1reminderUnit" value="min" /><label for="1radioUnit1">min</label>
+                        <input type="radio" id="1radioUnit2" name="1reminderUnit" value="h" checked="checked" /><label for="1radioUnit2">h</label>
+                        <input type="radio" id="1radioUnit3" name="1reminderUnit" value="days" /><label for="1radioUnit3">days</label>
+                    </div>
+                    <button onclick="removeRow(1);"  style="margin-top: 9px; margin-left: 20px;" id="1removeRem">Remove reminder</button>
+                </div>
+                
+                <div id="2Reminder" style="margin-top: 5px;">
+                <br style="clear: both;" />
+                    <div id="2radio" style="float: left; margin-top: 9px;">
+                        <input type="radio" id="2radio1" name="2reminderType" value="email" checked="checked"/><label for="2radio1">email</label>
+                        <input type="radio" id="2radio2" name="2reminderType" value="sms"  /><label for="2radio2">sms</label>
+                        <input type="radio" id="2radio3" name="2reminderType" value="alert" /><label for="2radio3">alert</label>
+                    </div>
+                    <input type="text"  value="3" name="2remCount" style="float: left;">
+                    <div id="2radioUnit" style="float: left; margin-left: 5px; margin-top: 9px;">
+                        <input type="radio" id="2radioUnit1" name="2reminderUnit" value="min" /><label for="2radioUnit1">min</label>
+                        <input type="radio" id="2radioUnit2" name="2reminderUnit" value="h" checked="checked" /><label for="2radioUnit2">h</label>
+                        <input type="radio" id="2radioUnit3" name="2reminderUnit" value="days" /><label for="2radioUnit3">days</label>
+                    </div>
+                    <button onclick="removeRow(2);" style="margin-top: 9px; margin-left: 20px;" id="2removeRem">Remove reminder</button>
+                </div>
+            </div>
+            <br style="clear: both;" />
+            <button  style="margin-left: 265px; margin-top: 15px;" id="addRem">Add new remider</button>
+            <br style="clear: both;" />
+            <input type="hidden" id="numOfRem" value="2" name="numOfRem" />
+            <button style="margin-left: 10px; margin-top: 15px; width: 295px;" id="cancel" >Cancel changes</button>
+            <input style="margin-left: 10px; margin-top: 15px; width: 295px;" type="submit" value="Create event"/>
+            
+            <br />
+    </form>
+</div>
+<script type="text/javascript" src="/js/main.js" ></script>
+<script type="text/javascript">
+
+    $(function() {
+    	var num = $("#numOfRem").val();
+    	
+        $("#1radio").buttonset();
+        $("#1radioUnit").buttonset();
+        
+        $("#2radioUnit").buttonset();
+        $("#2radio").buttonset();
+        
+        $("input:submit").button();
+        
+        $("#1removeRem").button({
+            icons: {
+                primary: 'ui-icon-trash'
+            },
+            text: false
+        });
+        
+        $("#2removeRem").button({
+            icons: {
+                primary: 'ui-icon-trash'
+            },
+            text: false
+        });
+
+        $("#addRem").button({
+            icons: {
+                primary: 'ui-icon-plus'
+            },
+            text: true
+        }).click(function(){
+            num = parseInt(num) + 1;
+            num1 = parseInt($("#numOfRem").val());
+
+            if (num1 != 5){
+                var html = 
+                "<div id=\""+num+"Reminder\" style=\"margin-top: 5px;\">" +
+                "<br style=\"clear: both;\" />"+
+                "<div id=\""+num+"radio\" style=\"float: left; margin-top: 9px;\">" +
+                    "<input type=\"radio\" id=\""+num+"radio1\" name=\""+num+"reminderType\" value=\"email\" checked=\"checked\"/><label for=\""+num+"radio1\">email</label>" +
+                    "<input type=\"radio\" id=\""+num+"radio2\" name=\""+num+"reminderType\" value=\"sms\"  /><label for=\""+num+"radio2\">sms</label>" +
+                    "<input type=\"radio\" id=\""+num+"radio3\" name=\""+num+"reminderType\" value=\"alert\"  /><label for=\""+num+"radio3\">alert</label>" +
+                "</div>" +
+                "<input type=\"text\"  value=\"3\" name=\""+num+"remCount\" style=\"float: left;\">" +
+                "<div id=\""+num+"radioUnit\" style=\"float: left; margin-left: 5px; margin-top: 9px;\">" +
+                    "<input type=\"radio\" id=\""+num+"radioUnit1\" name=\""+num+"reminderUnit\" value=\"min\" /><label for=\""+num+"radioUnit1\">min</label>" +
+                    "<input type=\"radio\" id=\""+num+"radioUnit2\" name=\""+num+"reminderUnit\" value=\"h\" checked=\"checked\" /><label for=\""+num+"radioUnit2\">h</label>" +
+                    "<input type=\"radio\" id=\""+num+"radioUnit3\" name=\""+num+"reminderUnit\" value=\"days\" /><label for=\""+num+"radioUnit3\">days</label>" +
+                "</div>" +
+                "<button onclick=\"removeRow("+num+")\" style=\"margin-top: 9px; margin-left: 20px;\" id=\""+num+"removeRem\">Remove reminder<\/button>" +
+            "</div>";
+                
+                $('.reminderRow').append(html);
+                $("#"+num+"radio").buttonset();
+                
+                $("#"+num+"radioUnit").buttonset();
+    
+                $("#"+num+"removeRem").button({
+                    icons: {
+                        primary: 'ui-icon-trash'
+                    },
+                    text: false
+                });
+                
+                $("#numOfRem").val(num1 + 1);
+            }else alert("Maximum number of reminders reached!");
+            
+            return false;
+        });
+    });
+
+    function removeRow(id){
+        $("#"+id+"Reminder").remove();
+         num = $("#numOfRem").val();
+         num = num - 1;
+         console.log(num);
+         $("#numOfRem").val(num);
+    
+         return false;
+    }
+</script>
+
+<?php 
+        echo $this->partial("partials/nav.phtml", array('current' => 'create'));  
+ ?>

@@ -1,13 +1,12 @@
 
 <?php  echo $this->partial("partials/header.phtml", array('msg' => "edit event...",'username' => $this->username,));
-?> 
-<?php 
+?>
+<?php
     echo $this->partial("partials/nav.phtml");
  ?>
 <div class="contentHolder" >
-    
-        
-    <form action="/home/edit-event-details" name="form" method="POST" id="form"> 
+
+    <form action="/home/edit-event-details" name="form" method="POST" id="form">
             <div class="textFieldHolder">
                 <span>title</span><br>
                 <input type="text" value="<?php echo $this->event['title']; ?>" style="width: 440px;" name="title">
@@ -15,11 +14,11 @@
             <div class="textFieldHolder">
                 <span>when</span><br>
                 <input style=" width: 92px;" type="text" value="<?php echo $this->event['when'][0]['start']; ?>" id="startDate" name="startDate">
-                
+
                 <input style=" width: 50px; <?php if ($this->event['when'][0]['allDay'] == true) echo " display:none; "; ?>" maxlength="5" type="text" value="<?php if ($this->event['when'][0]['startTime'] != null) echo $this->event['when'][0]['startTime']; else echo date('H:i'); ?>" id="startTime" name="startTime">
-                
-                
-                <span style=" margin-left: 5px;" > to 
+
+
+                <span style=" margin-left: 5px;" > to
                    <input style=" width: 92px; margin-left: 5px;" type="text" value="<?php echo $this->event['when'][0]['end']; ?>" id="endDate" name="endDate">
                    <input style=" width: 50px; <?php if ($this->event['when'][0]['allDay'] == true) echo " display:none; "; ?>" maxlength="5" type="text" value="<?php if ($this->event['when'][0]['endTime'] != null) echo $this->event['when'][0]['endTime']; else echo date('H:i'); ?>" id="endTime" name="endTime">
                    &nbsp;&nbsp;&nbsp;
@@ -28,24 +27,24 @@
             </div>
             <div class="textFieldHolder">
                 <span>where</span><br>
-                <input type="text" value="<?php 
+                <input type="text" value="<?php
                     foreach ($this->event['where'] as $where){
                         if($where['location'] != null || $where['location'] != '') echo $where['location'] . " ";
                     }
-                        
+
                  ?>" name="where">
             </div>
             <div class="textFieldHolder">
                 <span>description</span><br>
                 <textarea name="desc"><?php echo $this->event['desc']; ?></textarea>
             </div>
-            
+
             <div class="reminderRow textFieldHolder" >
                 <span >Reminder</span>
-                
-                <?php 
+
+                <?php
                 $i = 0;
-                if ($this->event['when'][0]['reminders'] != null)
+                if (count($this->event['when']) > 0 && $this->event['when'][0]['reminders'] != null)
                     foreach ($this->event['when'][0]['reminders'] as $key => $reminder) {
                             $i = $key+1;
                     ?>
@@ -59,7 +58,7 @@
                         <?php if  ($reminder['minutes']%1440 == 0){
                                   $timeForRem = $reminder['minutes']/1440;
                                   $remUnit = 'd';
-                               }else if ($reminder['minutes']%60 == 0){ 
+                               }else if ($reminder['minutes']%60 == 0){
                                    $timeForRem = $reminder['minutes']/60;
                                    $remUnit = 'h';
                                 }else {
@@ -76,7 +75,7 @@
                         <button onclick="removeRow(<?php echo $i; ?>);"  style="margin-top: 9px; margin-left: 20px;" id="<?php echo $i; ?>removeRem">Remove reminder</button>
                     </div>
                 <?php } if ($i == 0) echo '<span id="noRemSet"><br /><em>No reminders set!</em></span>'; ?>
-                
+
             </div>
             <br style="clear: both;" />
             <button  style="margin-left: 265px; margin-top: 15px;" id="addRem">Add new remider</button>
@@ -85,15 +84,15 @@
             <input type="hidden" id="eventId" value="<?php echo $this->eventId; ?>" name="eventId" />
             <button style="margin-left: 10px; margin-top: 15px; width: 295px;" id="cancel" >Cancel changes</button>
             <input style="margin-left: 10px; margin-top: 15px; width: 295px;" type="submit" value="Save changes"/>
-            
+
             <br />
     </form>
-  </div> 
+  </div>
   <script type="text/javascript" src="/js/main.js" ></script>
     <script type="text/javascript">
 
     $(function() {
-    	
+
         var num = $("#numOfRem").val();
 
         $("input:submit").button();
@@ -119,43 +118,43 @@
             text: true
         }).click(function(){
             $('#noRemSet').remove();
-            
+
             num = parseInt(num) + 1;
             num1 = parseInt($("#numOfRem").val());
 
             if (num1 != 5){
-                var html = 
+                var html =
                 "<div id=\""+num+"Reminder\" style=\"margin-top: 5px;\">" +
                 "<br style=\"clear: both;\" />"+
                 "<div id=\""+num+"radio\" style=\"float: left; margin-top: 9px;\">" +
                     "<input type=\"radio\" id=\""+num+"radio1\" name=\""+num+"reminderType\" value=\"email\" checked=\"checked\"/><label for=\""+num+"radio1\">email</label>" +
                     "<input type=\"radio\" id=\""+num+"radio2\" name=\""+num+"reminderType\" value=\"sms\"  /><label for=\""+num+"radio2\">sms</label>" +
                     "<input type=\"radio\" id=\""+num+"radio3\" name=\""+num+"reminderType\" value=\"alert\"  /><label for=\""+num+"radio3\">alert</label>" +
-                "</div>" + 
+                "</div>" +
                 "<input type=\"text\"  value=\"3\" name=\""+num+"remCount\" style=\"float: left;\">" +
-                "<div id=\""+num+"radioUnit\" style=\"float: left; margin-left: 5px; margin-top: 9px;\">" + 
-                    "<input type=\"radio\" id=\""+num+"radioUnit1\" name=\""+num+"reminderUnit\" value=\"min\" /><label for=\""+num+"radioUnit1\">min</label>" + 
-                    "<input type=\"radio\" id=\""+num+"radioUnit2\" name=\""+num+"reminderUnit\" value=\"h\" checked=\"checked\" /><label for=\""+num+"radioUnit2\">h</label>" + 
-                    "<input type=\"radio\" id=\""+num+"radioUnit3\" name=\""+num+"reminderUnit\" value=\"days\" /><label for=\""+num+"radioUnit3\">days</label>" + 
-                "</div>" + 
-                "<button onclick=\"removeRow("+num+")\" style=\"margin-top: 9px; margin-left: 20px;\" id=\""+num+"removeRem\">Remove reminder<\/button>" + 
+                "<div id=\""+num+"radioUnit\" style=\"float: left; margin-left: 5px; margin-top: 9px;\">" +
+                    "<input type=\"radio\" id=\""+num+"radioUnit1\" name=\""+num+"reminderUnit\" value=\"min\" /><label for=\""+num+"radioUnit1\">min</label>" +
+                    "<input type=\"radio\" id=\""+num+"radioUnit2\" name=\""+num+"reminderUnit\" value=\"h\" checked=\"checked\" /><label for=\""+num+"radioUnit2\">h</label>" +
+                    "<input type=\"radio\" id=\""+num+"radioUnit3\" name=\""+num+"reminderUnit\" value=\"days\" /><label for=\""+num+"radioUnit3\">days</label>" +
+                "</div>" +
+                "<button onclick=\"removeRow("+num+")\" style=\"margin-top: 9px; margin-left: 20px;\" id=\""+num+"removeRem\">Remove reminder<\/button>" +
             "</div>";
-                
+
                 $('.reminderRow').append(html);
                 $("#"+num+"radio").buttonset();
-                
+
                 $("#"+num+"radioUnit").buttonset();
-    
+
                 $("#"+num+"removeRem").button({
                     icons: {
                         primary: 'ui-icon-trash'
                     },
                     text: false
                 });
-                
+
                 $("#numOfRem").val(num1 + 1);
             }else alert("Maximum number of reminders reached!");
-            
+
             return false;
         });
     });
@@ -165,12 +164,12 @@
          num = $("#numOfRem").val();
          num = num - 1;
          $("#numOfRem").val(num);
-    
+
          return false;
     }
 </script>
 
 
-<?php 
+<?php
     echo $this->partial("partials/nav.phtml");
  ?>

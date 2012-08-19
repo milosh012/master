@@ -1,35 +1,40 @@
 
-<?php  
-   echo $this->partial("partials/header.phtml", array('msg' => "show events on map...",'username' => $this->username,)); 
-?> 
+<?php
+   echo $this->partial("partials/header.phtml", array('msg' => "show events on map...",'username' => $this->username,));
+?>
 <?php  echo $this->partial("partials/nav.phtml", array('current' => 'map'));  ?>
 <style type="text/css">
     #map {
         float: left;
         color: #fff;
-        width:950px; 
-        height:500px; 
-        margin-bottom: 20px; 
-        margin-left:15px; 
+        width:950px;
+        height:500px;
+        margin-bottom: 20px;
+        margin-left:15px;
         border:1px solid black;
     }
-    
-</style>    
+
+</style>
 
 <div class="contentHolder" >
-    <div style="margin-bottom: 20px; padding: 0pt 0.7em;" class="ui-state-highlight ui-corner-all"> 
+    <div style="margin-bottom: 20px; padding: 0pt 0.7em;" class="ui-state-highlight ui-corner-all">
+
         <p>
             <span style="float: left; margin-right: 0.3em; margin-top:4px;" class="ui-icon ui-icon-info"></span>
+            <?php if ($this->events != '[]') : ?>
             Showing only events occurring in the future with location defined. Click on pin to view event details...
+            <?php else : ?>
+            There is not events in future with destination set.
+            <?php endif; ?>
         </p>
     </div>
     <div>
-     <?php 
+     <?php
         $events = json_decode($this->events);
         $alphabet = array ("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z");
         $i = 0;
         foreach ($events as $event) { ?>
-		    <div style="margin-bottom: 20px; margin-left:10px; padding: 0pt 0.7em; width:290px; float: left; height: 120px;" class="ui-state-highlight ui-corner-all"> 
+		    <div style="margin-bottom: 20px; margin-left:10px; padding: 0pt 0.7em; width:290px; float: left; height: 120px;" class="ui-state-highlight ui-corner-all">
 		        <p>
 		           <?php echo '<strong style="color:#FF3D00;">'. $alphabet[$i] .'</strong> - ' .  $event->name; $i++;?>
 		        </p>
@@ -49,16 +54,24 @@
 
 <script type="text/javascript"><!--
 $(function() {
-	$("#map").imGoogleMaps({
-		address: <?php echo $this->events; ?>,
-        data_type: 'json',
-        map: 'googMap',
-        menu_class: 'googControls',
-        print_class: 'googPrint',
-        mode: "manual",
-        show_directions_menu: false,
-        progress_bar: {container: 'imProgBarCntnr', bar_back_class: 'imBarBack', bar_class: 'imProgBar'},
-        geocode_request_rate: 1000
-    }); 
+    var events = <?php echo $this->events; ?>;
+    if (events.length > 0)
+    {
+    	$("#map").imGoogleMaps({
+    		address: <?php echo $this->events; ?>,
+            data_type: 'json',
+            map: 'googMap',
+            menu_class: 'googControls',
+            print_class: 'googPrint',
+            mode: "manual",
+            show_directions_menu: false,
+            progress_bar: {container: 'imProgBarCntnr', bar_back_class: 'imBarBack', bar_class: 'imProgBar'},
+            geocode_request_rate: 1000
+        });
+    }
+    else
+    {
+        $("#map").hide();
+    }
 });
 </script>

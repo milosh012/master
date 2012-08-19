@@ -2,73 +2,73 @@
  * 	 imGoogleMaps - A JQuery Google Maps Implementation
  * 	 @author Les Green
  * 	 Copyright (C) 2008-2009 Intriguing Minds, Inc.
- *   
+ *
  *   Version 0.9.3 - 8 Jan 2010
  *   1. Bug fix - markers not displaying in ie
- *   2. Add images to infoWindow 
- *   
- *   
+ *   2. Add images to infoWindow
+ *
+ *
  *   Version 0.9.2 - 30 Dec 2009
- *   
+ *
  *   1. Bug fix - Print displaying null on screen
  *   2. Bug fix - Received error when clicking on infoWindow if full address was not given
- *   3. Changed infoWindow so that is does not display street view link if 
- *   	StreetViewPanorama is not available for given point. 
+ *   3. Changed infoWindow so that is does not display street view link if
+ *   	StreetViewPanorama is not available for given point.
  *   	And Street View Overlay will not open to Street View if address not available
- *   4. Added option: geocode_request_rate. 
+ *   4. Added option: geocode_request_rate.
  *   	Geocode Requests limited to 15000 per IP address per day (which works out at
 		an average of one every 5.76 seconds). Had to create delayed request - 1 every 5 seconds.
-		
-		The default for geocode_request_rate is 1000 (1 sec). If address amount is over 10, 
-		set this at a higher rate - 5000 (5 secs) and use progress_bar option 
-		
+
+		The default for geocode_request_rate is 1000 (1 sec). If address amount is over 10,
+		set this at a higher rate - 5000 (5 secs) and use progress_bar option
+
 	 5.	Added progress_bar option. Uses imProgressBar plugin. Because of the delay, this will
 	 	let the user know that the requests are processing.
-	 	
+
 	 6. Added phone (phone number) and desc (description) option to json record. Will be displayed in infoWindow.
- *      Phone Number style same as address. 
+ *      Phone Number style same as address.
  *      Description - Style = span.imDescription
  *   7. Added custom_marker option - http://gmaps-utility-library.googlecode.com/svn/trunk/mapiconmaker/1.1/src/
  *   	custom_marker can optionally be added to json record - if you want each marker to have a custom color
- *   	Can also use Custom Marker that don't use the file - http://code.google.com/p/google-maps-icons/    	
- *   
- *   
+ *   	Can also use Custom Marker that don't use the file - http://code.google.com/p/google-maps-icons/
+ *
+ *
  *   Version 0.9.1 - 24 Dec 2009
- *   
+ *
  *   1. Fixed bug with Street View Control. Button did not exit street view
- *   
+ *
  *   Version 0.9 - 18 Dec 2009
  *   1. Fixed manual mode bug
  *   2. Added option for manual mode - remove 'Get Directions' label and directions div.
  *   	show_directions_menu: false
- *   	
+ *
  *   	The following options are not needed when show_directions_menu == false
  *   		directions
  *   		search
  *   		button_class
- *    
- *   3. Can press enter when doing a search (if on from or to field). No longer have to click search button   
+ *
+ *   3. Can press enter when doing a search (if on from or to field). No longer have to click search button
  *   4. Added Street view (Panorama)
  *   	Requires the following options:
- *   
+ *
  *    	street_view - the div that holds the street view
  *    	street_close_loc - the location of the close button for street view.
- *      
- *            
- *   5. Ability to plot multiple addresses. 
+ *
+ *
+ *   5. Ability to plot multiple addresses.
  *   	When getting multiple addresses via the data_url option, the data_type must be set to json
  *      Also added 'name' option to json record, so name and address can be displayed in infoWindow.
- *      Style = span.imBusinessName 
- *   
- *     
- *   
- *   
+ *      Style = span.imBusinessName
+ *
+ *
+ *
+ *
  *   version 1.0 - may add the following:
  *   1. http://www.geocodezip.com/mapStreetviewTabs.html - directions in tab
  *   2. Adsense for Maps - http://code.google.com/apis/maps/documentation/services.html#Advertising
  *   3. Traffic Overlay
  *   4. Microsoft Virtual Earth - http://www.mashedworld.com/DualMaps.aspx
- *  
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
@@ -82,12 +82,12 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- *   Demo and Documentation can be found at:   
+ *   Demo and Documentation can be found at:
  *   http://www.grasshopperpebbles.com
- *   
+ *
  */
 
-//imGMapObj (map object) and imStreetViewPoint (LatLng) must be set outside object 
+//imGMapObj (map object) and imStreetViewPoint (LatLng) must be set outside object
 //due to closure issue with map.getInfoWindow in Javascript call
 var imGMapObj = null;
 var imStreetViewPoint = null;
@@ -113,13 +113,13 @@ function imIconOptions(icon_options) {
 
 ;(function($) {
 	$.fn.extend({
-        imGoogleMaps: function(options) { 
+        imGoogleMaps: function(options) {
         	opts = $.extend({}, $.googleMaps.defaults, options);
 			return this.each(function() {
 				new $.googleMaps(this, opts);
 			});
         }
-    });	
+    });
 
 $.googleMaps = function(obj, opts) {
 	var gdir, geocoder, gSearch, gMap, panoClient = null;
@@ -129,7 +129,7 @@ $.googleMaps = function(obj, opts) {
 	var aIconOptions = new Array();
 	var aRequestedAdress = '';
 	init();
-	
+
 	function init() {
   		if (opts.mode == 'auto') {
 			gSearch = 'dlgSearch';
@@ -151,16 +151,16 @@ $.googleMaps = function(obj, opts) {
 				display: {'type': 'inline', 'insert_type': 'before', 'element': '#'+opts.map},
 				animate_duration: 1500
 			});
-		}	
+		}
 		if (opts.data_url) {
 			var d = getDataString();
 			doAjax('GET', opts.data_url, d, '', loadAddress);
 		}
-		else 
+		else
 			if (opts.address) {
 				loadAddress(opts.address);
 			}
-			else 
+			else
 				if (opts.lat_lng) {
 					loadAddress(opts.lat_lng);
 				}
@@ -176,7 +176,7 @@ $.googleMaps = function(obj, opts) {
 			$('<div></div>')
 				.css({backgroundColor: opts.menu_bar.background, color: opts.menu_bar.text, width: bWidth, height: "24px", marginBottom:"2px"})
 				.append(
-					$('<ul></ul>')	
+					$('<ul></ul>')
 						.css({listStyle: "none", marginTop:"0", marginBottom:"0", marginLeft:"3px", paddingLeft:"0", display:"block", width:"100px", float:"left"})
 						.append(
 							$('<li></li>').css({display: "inline", marginRight: "10px", marginTop:"0", marginBottom:"0", marginLeft:"0"}).append(getLink('Get Directions', 'showDlgSearch'))),
@@ -184,7 +184,7 @@ $.googleMaps = function(obj, opts) {
 						$('<ul></ul>').css({listStyle: "none", marginTop:"0", marginBottom:"0", marginLeft:"3px", paddingLeft:"0"})
 							.append(
 							$('<li></li>').css({display: "inline", marginRight: "10px", marginTop:"0", marginBottom:"0", marginLeft:"0"}).append(getLink('Print Map', 'printMap', 'googleMap')),
-							$('<li></li>').css({display: "inline", marginRight: "10px", marginTop:"0", marginBottom:"0", marginLeft:"0"}).append(getLink('Print Directions', 'printMap', 'googleDirections'))))),	
+							$('<li></li>').css({display: "inline", marginRight: "10px", marginTop:"0", marginBottom:"0", marginLeft:"0"}).append(getLink('Print Directions', 'printMap', 'googleDirections'))))),
 			$('<div></div>')
 				.attr("id", "dlgSearch")
 				.css({float:"left", width:dWidth, minHeight:"100px", backgroundColor:opts.directions.background, color:opts.directions.text, marginBottom:"2px", display:"none", paddingTop:"0px"})
@@ -217,10 +217,10 @@ $.googleMaps = function(obj, opts) {
 			doSearch(dWidth);
 		});
 	};
-		
+
 	function createManual() {
 		var getDir = (opts.show_directions_menu) ? $('<li></li>').append(getLink('Get Directions', 'showDlgSearch')) : $('<li></li>');
-		var printDir = (opts.show_directions_menu) ? $('<li></li>').append(getLink('Print Directions', 'printMap', opts.directions)) : $('<li></li>'); 
+		var printDir = (opts.show_directions_menu) ? $('<li></li>').append(getLink('Print Directions', 'printMap', opts.directions)) : $('<li></li>');
 		$this.prepend(
 			$('<div></div>')
 				.addClass(opts.menu_class)
@@ -230,7 +230,7 @@ $.googleMaps = function(obj, opts) {
 							$(printDir),
 							$('<li></li>').append(getLink('Print Map', 'printMap', opts.map))))));
 		if (opts.show_directions_menu) {
-			$this.append(						
+			$this.append(
 				$('<div></div>')
 					.attr("id", opts.search)
 					.append(
@@ -242,13 +242,13 @@ $.googleMaps = function(obj, opts) {
 							.css({float:"left", width:"15px", height:"15px", backgroundColor:"#fB7468", color:"#000", border:"solid thin #000", font:"bold 11px/16px Helvitica, Arial, sans-serif", display:"block", paddingLeft:"6px", marginLeft:"12px"})
 							.append('B'),
 						$('<input type="text" name="googleTo" id="googleTo" maxlength="75" value="" /><br />').val(opts.address),
-						$('<input type="submit" name="btnGetDir" id="btnGetDir" value="Get Directions" />').addClass(opts.button_class)),	
+						$('<input type="submit" name="btnGetDir" id="btnGetDir" value="Get Directions" />').addClass(opts.button_class)),
 				$('<div></div>')
 					.attr("id", opts.map),
 				$('<div></div>')
 					.attr("id", opts.directions)
 					.html(opts.address));
-			var dWidth = (parseInt($this.css("width")) - parseInt($('#'+opts.map).css('width'))) + "px";		
+			var dWidth = (parseInt($this.css("width")) - parseInt($('#'+opts.map).css('width'))) + "px";
 			$('#btnGetDir').click(function() {
 				doSearch(dWidth);
 			});
@@ -257,25 +257,25 @@ $.googleMaps = function(obj, opts) {
 					e.preventDefault();
 					doSearch();
 				}
-			});		
+			});
 		} else {
 			$this.append($('<div></div>').attr("id", opts.map));
-		}	
-		
+		}
+
 		if (opts.street_view) {
 			$('<div></div>').attr("id", "imStreetViewClose")
 						.append($('<a></a>').attr({
 							"id": "imStreetCloseBtn",
 							'title': 'Exit Street View'
 						}).append($('<img></img>').attr('src', opts.street_close_loc))).insertAfter("#"+opts.map);
-			$('<div></div>').attr("id", opts.street_view).insertAfter("#imStreetViewClose");			
+			$('<div></div>').attr("id", opts.street_view).insertAfter("#imStreetViewClose");
 			$('#imStreetCloseBtn').click(function() {
 				imStreetView.toggleStreetView(false);
 			});
-			
-		}	
-	};	
-	
+
+		}
+	};
+
 	function showDlgSearch() {
 		var d = ($("#"+gSearch).css("display") == "none") ? "block" : "none";
 		$("#"+gSearch).css("display", d);
@@ -288,7 +288,7 @@ $.googleMaps = function(obj, opts) {
 		showMap();
 		loadAddress(toAddress);
 	};
-	
+
 	function doSearch(dWidth) {
 		if (($("#googleFrom").val() != '') && ($("#googleTo").val() != '')) {
 			toAddress = $("#googleTo").val();
@@ -296,13 +296,13 @@ $.googleMaps = function(obj, opts) {
 				$("#googleDirections").html('').css("width", parseInt(dWidth) - 10);
 			} else {
 				$("#"+opts.directions).html('');
-			}	
+			}
 			gdir.load("from: " + $("#googleFrom").val() + " to: " + toAddress);
 		} else {
-			alert("From and To addresses must be entered");	
+			alert("From and To addresses must be entered");
 		}
 	};
-	
+
 	function showMap() {
 		var w,h,dir = null;
     	if (GBrowserIsCompatible()) {
@@ -341,14 +341,14 @@ $.googleMaps = function(obj, opts) {
 	                }
 	            });
 			}
-			
+
 			/*baseIcon = new GIcon(G_DEFAULT_ICON);
 			baseIcon.shadow = "http://www.google.com/mapfiles/shadow50.png";
 			baseIcon.iconSize = new GSize(20, 34);
 			baseIcon.shadowSize = new GSize(37, 34);
 			baseIcon.iconAnchor = new GPoint(9, 34);
 			baseIcon.infoWindowAnchor = new GPoint(9, 2);*/
-			
+
 			if ((opts.show_directions_menu) && (opts.directions)) {
 				gdir = new GDirections(imGMapObj, document.getElementById(dir));
 				//gdir = new GDirections(imGMapObj, $('#'+dir));
@@ -357,12 +357,12 @@ $.googleMaps = function(obj, opts) {
 			}
     	}
     };
-	
+
 	/*function getAdrLocationOld(adr, adr_cnt, cnt, bn) {
 		geocoder.getLocations(adr, function(response) {
 			if (!response || response.Status.code != 200) {
 	    		alert("Sorry, we are unable to gecode address: " + adr);
-		  	} else { 
+		  	} else {
 		    	var place = response.Placemark[0];
 				aLatLng[cnt] = new imLatLngs(place.Point.coordinates[1], place.Point.coordinates[0], place, bn);
 				if (aLatLng.length == adr_cnt) {
@@ -371,14 +371,16 @@ $.googleMaps = function(obj, opts) {
 		  	}
 		});
 	};*/
-	
+
 	function getAdrLocation(cnt) {
 		var adr, bName, phone, desc, img, adr_cnt, iOptions = '';
 		var isExist = true;
-		
-		if (aRequestedAdress.lat) {
+		if (aRequestedAdress.length == 0) {
+			adr_cnt = 0;
+			adr = null;
+		}else if (aRequestedAdress.lat) {
 			adr = new GLatLng(aRequestedAdress.lat, aRequestedAdress.lng);
-			adr_cnt = 1; 
+			adr_cnt = 1;
 		} else if (aRequestedAdress[0].address) {
 			adr_cnt  = aRequestedAdress.length;
 			adr = aRequestedAdress[cnt].address;
@@ -394,50 +396,56 @@ $.googleMaps = function(obj, opts) {
 			adr = aRequestedAdress;
 			adr_cnt = 1;
 		}
-		geocoder.getLocations(adr, function(response) {
-			if (!response || response.Status.code != 200) {
-	    		alert("Sorry, we are unable to gecode address: " + adr);
-	    		isExist = false;
-		  	} else { 
-		  		isExist = true;
-		    	var place = response.Placemark[0];
-				aLatLng[cnt] = new imLatLngs(place.Point.coordinates[1], place.Point.coordinates[0], place, bName, phone, desc, img);
-				if (iOptions) {
-					aIconOptions[cnt] = iOptions;
+
+		if (adr != null) {
+			geocoder.getLocations(adr, function(response) {
+				if (!response || response.Status.code != 200) {
+		    		alert("Sorry, we are unable to gecode address: " + adr);
+		    		isExist = false;
+			  	} else {
+			  		isExist = true;
+			    	var place = response.Placemark[0];
+					aLatLng[cnt] = new imLatLngs(place.Point.coordinates[1], place.Point.coordinates[0], place, bName, phone, desc, img);
+					if (iOptions) {
+						aIconOptions[cnt] = iOptions;
+					}
+					cnt++;
+					if (opts.progress_bar) {
+						$(window).trigger('updateProgress');
+					}
+					if (cnt < adr_cnt) {
+						//gecode has a rate limit for requests
+						imGeocodeRequestDelay = setTimeout (function() {
+							getAdrLocation(cnt);
+						}, opts.geocode_request_rate);
+					} else {
+						clearTimeout(imGeocodeRequestDelay);
+						mapAddress();
+					}
+			  	}
+				if (!isExist){
+					cnt++;
+					if (opts.progress_bar) {
+						$(window).trigger('updateProgress');
+					}
+					if (cnt < adr_cnt) {
+						//gecode has a rate limit for requests
+						imGeocodeRequestDelay = setTimeout (function() {
+							getAdrLocation(cnt);
+						}, opts.geocode_request_rate);
+					}
 				}
-				cnt++;
-				if (opts.progress_bar) {
-					$(window).trigger('updateProgress');
-				}
-				if (cnt < adr_cnt) {
-					//gecode has a rate limit for requests
-					imGeocodeRequestDelay = setTimeout (function() {
-						getAdrLocation(cnt);
-					}, opts.geocode_request_rate);
-				} else {
-					clearTimeout(imGeocodeRequestDelay);
-					mapAddress();
-				}
-		  	}
-			if (!isExist){
-				cnt++;
-				if (opts.progress_bar) {
-					$(window).trigger('updateProgress');
-				}
-				if (cnt < adr_cnt) {
-					//gecode has a rate limit for requests
-					imGeocodeRequestDelay = setTimeout (function() {
-						getAdrLocation(cnt);
-					}, opts.geocode_request_rate);
-				} 
-			}
-		});
+			});
+		}
 	};
-	
+
 	function getAddressCount(address) {
 		var adr_cnt = 0;
-		if (address.lat) {
-			adr_cnt = 1; 
+
+		if (address.length == 0) {
+			return 0;
+		} else if (address.lat) {
+			adr_cnt = 1;
 		} else if (address[0].address) {
 			adr_cnt  = address.length;
 		} else if (address[0].lat) {
@@ -447,20 +455,20 @@ $.googleMaps = function(obj, opts) {
 		}
 		return adr_cnt;
 	};
-	
+
 	function loadAddress(address) {
 		if (geocoder) {
 			var total_recs = getAddressCount(address);
-			aRequestedAdress = address; 
+			aRequestedAdress = address;
 			//initialize progress bar
 			if (opts.progress_bar) {
 				$(window).trigger('startProgress', [total_recs]);
 			}
 			getAdrLocation(0);
 			//resizeMap();
-		}				
+		}
 	};
-	
+
 	/*function getLatLngsOld(address) {
 		var bName = '';
 		if (geocoder) {
@@ -470,18 +478,18 @@ $.googleMaps = function(obj, opts) {
 				getAdrLocation(place, 1, 0);
 				//getAdrLocation(place, 1, 0, '');
 			}
-			else 
+			else
 				if (address[0].address) {
 					adr_cnt  = address.length;
-					
+
 					getAdrLocation(address, adr_cnt, 0);
 					$.each(address, function(i, itm){
 						bName = (itm.name) ? itm.name : '';
 						//getAdrLocation(itm.address, adr_cnt, i, bName);
-						
+
 					});
 				}
-				else 
+				else
 					if (address[0].lat) {
 						adr_cnt  = address.length;
 						//gecode has a rate limit for requests
@@ -496,9 +504,9 @@ $.googleMaps = function(obj, opts) {
 					}
 		}
 	};*/
-	
+
 	function mapAddress() {
-		//set bounds	
+		//set bounds
 		bounds = new GLatLngBounds();
 		$.each(aLatLng, function(i, itm){
 			if (itm != null)
@@ -509,12 +517,12 @@ $.googleMaps = function(obj, opts) {
 		var newBounds = imGMapObj.getBounds();
 	    var newLatSpan = newBounds.toSpan().lat();
 	    if (latSpan/newLatSpan > .90) { imGMapObj.zoomOut(); }
-		
+
 		$.each(aLatLng, function(i, itm){
 			if (itm != null){
 				var point = new GLatLng(itm.lat, itm.lng);
 				var marker = createMarker(point, i, itm.place, itm.bus_name, itm.phone, itm.desc, itm.images);
-		      	
+
 				//var latlng = marker.getLatLng();
 		      	//var pixel = map.fromLatLngToDivPixel(latlng);
 		      	//if (Math.abs(pixel.x - clickedX) < 12 && Math.abs(pixel.y - clickedY) < 20) {
@@ -522,16 +530,16 @@ $.googleMaps = function(obj, opts) {
 		      	//}
 		      	imGMapObj.addOverlay(marker);
 			}
-		});	
+		});
     };
-	
+
 	function createMarker(point, index, place, bus_name, phone, desc, images) {
 		// Create a lettered icon for this point using our icon class
 		var icon = getIconOptions(index);
 		//var letter = String.fromCharCode("A".charCodeAt(0) + index);
 		//var letteredIcon = new GIcon(baseIcon);
 		//letteredIcon.image = "http://www.google.com/mapfiles/marker" + letter + ".png";
-	
+
 	  	// Set up our GMarkerOptions object
 	  	markerOptions = { icon: icon, draggable:opts.draggable};
 	  	var mrkr = new GMarker(point, markerOptions);
@@ -542,11 +550,11 @@ $.googleMaps = function(obj, opts) {
 				var str = place.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.Thoroughfare.ThoroughfareName;
 				var cty = place.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.LocalityName;
 				var ste = place.AddressDetails.Country.AdministrativeArea.AdministrativeAreaName;
-				
+
 				if (place.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.PostalCode != null)
 					var zip = place.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.PostalCode.PostalCodeNumber;
 				else zip = '';
-				
+
 				addr = str + '<br />' + cty + ', ' + ste + ' ' + zip;
 			} else {
 				addr = place.address;
@@ -561,7 +569,7 @@ $.googleMaps = function(obj, opts) {
 				addr += '<br /><span class="imDescription">' + desc +'</span>';
 			}
 		    */
-			
+
 			var mhtml = '<p class="infoWindowStreetAddress">';
 			mhtml += (bus_name) ? '<span class="imBusinessName">'+bus_name+'</span><br />'+addr : addr;
 			if (images) {
@@ -570,7 +578,7 @@ $.googleMaps = function(obj, opts) {
 				$.each(images, function(i, itm){
 					var cls = (itm.class) ? 'class="'+itm.class+'" ' : '';
 					theImage = '<img ' + cls + 'src="'+ itm.image_loc + '" width='+itm.width+' height='+itm.height+' />';
-					im += (itm.url) ? '<a href="' + itm.url + '" target="_blank">' + theImage + '</a>' : theImage;	
+					im += (itm.url) ? '<a href="' + itm.url + '" target="_blank">' + theImage + '</a>' : theImage;
 					if (itm.new_line) {
 						im += '<br />';
 					}
@@ -602,7 +610,7 @@ $.googleMaps = function(obj, opts) {
 		});
 	  	return mrkr;
 	};
-	
+
 	function getIconOptions(index) {
 		var iconOptions = {};
 		var icon, mOptions;
@@ -657,10 +665,10 @@ $.googleMaps = function(obj, opts) {
 		        icon.iconAnchor = new GPoint(mOptions.width/2, mOptions.height/2);
 				icon.infoWindowAnchor = new GPoint(mOptions.width/2, mOptions.height/2);
 			}
-		} 
-		return icon;	
+		}
+		return icon;
 	};
-	
+
 	function getIconOptionsOld(index) {
 		var iconOptions = {};
 		var icon;
@@ -720,7 +728,7 @@ $.googleMaps = function(obj, opts) {
 			}
 		}
 	};
-		
+
 	function handleErrors(){
 		var gError = gdir.getStatus().code;
 		switch(gError) {
@@ -729,7 +737,7 @@ $.googleMaps = function(obj, opts) {
 				break;
 			case G_GEO_UNAVAILABLE_ADDRESS:
 				alert("The geocode for the given address or the route for the given directions query cannot be returned due to legal or contractual reasons.\n Error code: " + gError);
-			case G_GEO_SERVER_ERROR: 
+			case G_GEO_SERVER_ERROR:
 				alert("A geocoding or directions request could not be successfully processed, yet the exact reason for the failure is not known.\n Error code: " + gError);
 				break;
 			case G_GEO_MISSING_QUERY:
@@ -745,30 +753,30 @@ $.googleMaps = function(obj, opts) {
 				alert("An unknown error occurred.");
 		}
 	};
-	
+
 	function getDataString() {
 		var str = '';
 		if (opts.data) {
 			$.each(opts.data, function(i, itm) {
-				str += itm.name + "=" + itm.value + "&";							
+				str += itm.name + "=" + itm.value + "&";
 			});
 			//remove last "&"
 			str = str.substr(0, (str.length-1));
 		}
 		return str;
 	};
-		
+
 	function doAjax(t, u, d, fnBefore, fnSuccess) {
 		$.ajax({
 			type: t,
 			url: u,
 			data: d,
 			dataType: opts.data_type,
-			beforeSend: fnBefore, 
+			beforeSend: fnBefore,
 			success: fnSuccess
 	 	}); //close $.ajax(
 	};
-	
+
 	function getLink(t, f, p) {
 		var a = document.createElement('a');
 		$(a)
@@ -787,7 +795,7 @@ $.googleMaps = function(obj, opts) {
 			if (opts.mode == 'auto') $(a).css({"color": opts.menu_bar.text, lineHeight: "26px", marginLeft: "5px", textDecoration: "none"});
 		return a;
 	};
-	
+
 	function printMap(div) {
 		//var w = (opts.mode == 'auto') ? parseInt(opts.map.width) : $('#'+opts.map).css('width');
 		//var h = (opts.mode == 'auto') ? parseInt(opts.map.height) : $('#'+opts.map).css('height');
@@ -795,12 +803,12 @@ $.googleMaps = function(obj, opts) {
 		var w = window.open();
 		//w.document.open("text/html");
 		w.document.write($('#'+div).html());
-		w.print();		
+		w.print();
 		//w.document.close();
 		w.close();
 	};
 };
-	
+
 $.googleMaps.defaults = {
 	mode: 'auto',//manual
 	data_url: '',
@@ -820,10 +828,10 @@ $.googleMaps.defaults = {
 	street_close_loc: '',
 	progress_bar: '',//{container: 'imProgBarCntnr', bar_back_class: '', bar_class: ''},
 	geocode_request_rate: 500,
-	custom_marker: ''//{'type': 'labeledmarker', 'width': '32', 'height': '32', 'primaryColor': '#FFD766A', 'strokeColor': '#000000', 'labelColor': '#000000', 'starPrimaryColor': '', 'starStrokeColor': '', 'cornerColor': '#FFFFFF', 'shape': 'circle'} 
+	custom_marker: ''//{'type': 'labeledmarker', 'width': '32', 'height': '32', 'primaryColor': '#FFD766A', 'strokeColor': '#000000', 'labelColor': '#000000', 'starPrimaryColor': '', 'starStrokeColor': '', 'cornerColor': '#FFFFFF', 'shape': 'circle'}
 };
 
-})(jQuery);		
+})(jQuery);
 
 
 function imStreetViewControl() {}
@@ -853,7 +861,7 @@ imStreetViewControl.prototype.initialize = function(imGMapObj) {
 	} else {
 		imGMapObj.removeOverlay(imSVOverlay);
 		imSVOverlay = null;
-	}	
+	}
   });
 
   imGMapObj.getContainer().appendChild(streetViewBtn);
@@ -877,7 +885,7 @@ function imStreetView() {
 		this.point = imStreetViewPoint;
 		this.toggleStreetView(bShow);
 	};
-	
+
 	this.toggleStreetView = function(bShow) {
 		if (bShow) {
 			document.getElementById( this.streetDiv ).style.display = 'block';
@@ -890,14 +898,14 @@ function imStreetView() {
 			document.getElementById( this.streetDiv ).style.display = 'none';
 			document.getElementById( this.streetClose ).style.display = 'none';
             document.getElementById( this.mapDiv ).style.display = 'block';
-			
-		}	
+
+		}
 	};
-	
+
 	this.handleNoFlash = function(errorCode) {
 		if (errorCode == 603) {
 		   alert("Error: Flash doesn't appear to be supported by your browser");
 		   return;
 		}
-	}; 
+	};
 }
